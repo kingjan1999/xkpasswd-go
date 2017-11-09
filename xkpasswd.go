@@ -21,9 +21,7 @@ func readLines(path string) ([]string, error) {
   return lines, nil
 }
 
-func getWords() (int, []string) {
-  var path string = "xkpasswd-words.txt"
-
+func getWords(path string) (int, []string) {
   lines, err := readLines(path)
   if err != nil {
     log.Fatalf("readLines: %s", err)
@@ -34,9 +32,9 @@ func getWords() (int, []string) {
   return count, lines
 }
 
-func getRandomWord() (string) {
+func getRandomWord(path string) (string) {
   r := rand.New(rand.NewSource(time.Now().UnixNano()))
-  allWordsCount, allWords := getWords()
+  allWordsCount, allWords := getWords(path)
   var randomNumber int = r.Intn(allWordsCount);
 
   return allWords[randomNumber]
@@ -48,17 +46,17 @@ func getRandomDigit() (int) {
   return digit
 }
 
-func generatePassword(pattern string, separator string) (string) {
-  words := patternToArray(pattern, separator)
+func GeneratePassword(pattern string, separator string, path string) (string) {
+  words := patternToArray(pattern, separator, path)
   return strings.Join(words, "")
 }
 
-func patternToArray(pattern string, separator string) ([]string) {
+func patternToArray(pattern string, separator string, path string) ([]string) {
   array := make([]string, 0)
 
   for i := 0; i < len(pattern); i++ {
     if (string(pattern[i]) == "w") {
-      array = append(array, getRandomWord())
+      array = append(array, getRandomWord(path))
     }
 
     if (string(pattern[i]) == "d") {
@@ -195,11 +193,15 @@ func main() {
     }
 
     for i := 0; i < inputNumber; i++ {
-      fmt.Println(generatePassword(pattern, separator))
+      fmt.Println(GeneratePassword(pattern, separator, "xkpasswd-words.txt"))
     }
 
     return nil
   }
 
   app.Run(os.Args)
+}
+
+func GenerateDefaultPassword(path string) string {
+  return GeneratePassword(getPatternForComplexity(1), "-", path)
 }
